@@ -1,0 +1,65 @@
+name: "CodeQL"
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "develop", "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+  pull_request:
+    branches: [ "develop", "main" ]
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
+    permissions:
+      # required for all workflows
+      security-events: write
+      # required to fetch internal or private CodeQL packs
+      packages: read
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
+
+    concurrency:
+      # Cancel any previously running CodeQL jobs for a PR when a new commit is pushed to the PR branch
+      group: ${{ github.workflow }}-${{ github.ref }}-${{ matrix.language }}
+      cancel-in-progress: true
+  
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: swift
+          build-mode: manual
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - name: Prepare for Manual Build
+      if: matrix.build-mode == 'manual'
+      uses: ./.github/actions/prepare_for_build
+
+    - if: matrix.build-mode == 'manual'
+      name: Build Manually
+      shell: bash
+      run: |
+        set -o pipefail
+        xcodebuild -project CodeQLTest/CodeQLTest.xcodeproj -scheme CodeQLTest -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' | xcbeautify
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
