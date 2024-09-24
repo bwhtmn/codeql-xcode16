@@ -42,15 +42,15 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
+    - name: Prepare for Manual Build
+      if: matrix.build-mode == 'manual'
+      uses: ./.github/actions/prepare_for_build
+
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-
-    - name: Prepare for Manual Build
-      if: matrix.build-mode == 'manual'
-      uses: ./.github/actions/prepare_for_build
 
     - if: matrix.build-mode == 'manual'
       name: Build Manually
