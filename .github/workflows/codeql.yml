@@ -46,6 +46,7 @@ jobs:
       if: matrix.build-mode == 'manual'
       uses: ./.github/actions/prepare_for_build
 
+    # Re-testing with v2.20.0
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
