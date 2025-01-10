@@ -16,7 +16,7 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-15') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       # required for all workflows
@@ -58,7 +58,7 @@ jobs:
       shell: bash
       run: |
         set -o pipefail
-        xcodebuild -project CodeQLTest/CodeQLTest.xcodeproj -scheme CodeQLTest -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' | xcbeautify
+        xcodebuild -project CodeQLTest/CodeQLTest.xcodeproj -scheme CodeQLTest -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' | xcbeautify
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
