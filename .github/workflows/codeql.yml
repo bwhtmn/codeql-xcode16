@@ -16,7 +16,7 @@ on:
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.language == 'swift' && 'macos-15') || 'ubuntu-latest' }}
     timeout-minutes: ${{ (matrix.language == 'swift' && 120) || 360 }}
     permissions:
       # required for all workflows
@@ -42,22 +42,24 @@ jobs:
     - name: Checkout Repository
       uses: actions/checkout@v4
 
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v3
-      with:
-        languages: ${{ matrix.language }}
-        build-mode: ${{ matrix.build-mode }}
-
     - name: Prepare for Manual Build
       if: matrix.build-mode == 'manual'
       uses: ./.github/actions/prepare_for_build
+
+    # Re-testing with v2.20.1
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.20.1/codeql-bundle-osx64.tar.gz
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
 
     - if: matrix.build-mode == 'manual'
       name: Build Manually
       shell: bash
       run: |
         set -o pipefail
-        xcodebuild -project CodeQLTest/CodeQLTest.xcodeproj -scheme CodeQLTest -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' | xcbeautify
+        xcodebuild -project CodeQLTest/CodeQLTest.xcodeproj -scheme CodeQLTest -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' | xcbeautify
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
