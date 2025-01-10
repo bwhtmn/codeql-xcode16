@@ -46,10 +46,11 @@ jobs:
       if: matrix.build-mode == 'manual'
       uses: ./.github/actions/prepare_for_build
 
-    # Re-testing with v2.20.0
+    # Re-testing with v2.20.1
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v3
       with:
+        tools: https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.20.1/codeql-bundle-osx64.tar.gz
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
 
